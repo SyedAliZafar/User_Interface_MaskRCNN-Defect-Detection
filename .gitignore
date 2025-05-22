@@ -16,6 +16,11 @@ Uploads/*.png
 Uploads/*.jpg
 Uploads/*.jpeg
 
+# UplaodImages
+ImagesUploaded/*.png
+ImagesUploaded/*.jpg
+ImagesUploaded/*.jpeg
+
 # Mask R-CNN library (dependency)
 mrcnn/
 

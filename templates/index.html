@@ -4,7 +4,7 @@
     <title>Mask R-CNN Crack Detection</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; background-color: #f0f2f5; }
-        .container { max-width: 800px; margin: auto; text-align: center; }
+        .container { max-width: 1000px; margin: auto; text-align: center; }
         .upload-box {
             background: linear-gradient(90deg, #6b48ff, #a35aff);
             color: white;
@@ -29,7 +29,7 @@
         }
         .upload-box-container {
             width: 100%;
-            height: 120px;
+            height: 200px;
             border: 2px dashed #ccc;
             border-radius: 10px;
             display: flex;
@@ -39,6 +39,7 @@
             background-color: #fff;
             cursor: pointer;
             position: relative;
+            overflow: hidden;
         }
         .upload-box-container:hover {
             background-color: #f9f9f9;
@@ -63,6 +64,12 @@
             font-size: 0.9em;
             color: #666;
         }
+        .preview-img {
+            width: 200px;
+            height: auto;
+            object-fit: contain;
+            margin-top: 10px;
+        }
         .select-box {
             width: 100%;
             padding: 10px;
@@ -85,19 +92,82 @@
         }
         .error { color: red; }
         .model-used { color: green; font-weight: bold; }
-        img.result-img { max-width: 100%; height: auto; margin-top: 20px; }
+        .checkbox-label { font-size: 1em; margin-bottom: 10px; display: block; }
+        .image-info { font-size: 1em; color: #333; margin-top: 10px; }
+        .results-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+        .image-container {
+            flex: 1;
+            margin: 0 10px;
+            text-align: center;
+        }
+        .image-container img {
+            width: 400px;  /* Larger size for results */
+            height: 400px;
+            object-fit: contain;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .image-container p {
+            font-size: 1em;
+            color: #333;
+            margin: 5px 0;
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const imageInput = document.getElementById('image');
+            const uploadContainer = document.querySelector('.upload-box-container');
+            const useLastImageCheckbox = document.getElementById('use_last_image');
+            const uploadIcon = document.querySelector('.upload-icon');
             const imageUploadText = document.querySelector('.upload-box-container span:nth-child(2)');
+            const uploadInfo = document.querySelector('.upload-info');
             const originalImageText = imageUploadText.textContent;
 
             imageInput.addEventListener('change', function() {
+                // Clear previous preview
+                const existingPreview = uploadContainer.querySelector('.preview-img');
+                if (existingPreview) {
+                    existingPreview.remove();
+                }
+
                 if (imageInput.files && imageInput.files.length > 0) {
                     imageUploadText.textContent = 'Selected: ' + imageInput.files[0].name;
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'preview-img';
+                        uploadContainer.appendChild(img);
+                        uploadIcon.style.display = 'none';
+                        uploadInfo.style.display = 'none';
+                    };
+                    reader.readAsDataURL(imageInput.files[0]);
                 } else {
                     imageUploadText.textContent = originalImageText;
+                    uploadIcon.style.display = 'block';
+                    uploadInfo.style.display = 'block';
+                }
+            });
+
+            useLastImageCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    uploadContainer.style.display = 'none';
+                } else {
+                    uploadContainer.style.display = 'flex';
+                    // Clear preview if switching back
+                    const existingPreview = uploadContainer.querySelector('.preview-img');
+                    if (existingPreview) {
+                        existingPreview.remove();
+                    }
+                    imageUploadText.textContent = originalImageText;
+                    uploadIcon.style.display = 'block';
+                    uploadInfo.style.display = 'block';
+                    imageInput.value = ''; // Clear file input
                 }
             });
         });
@@ -107,16 +177,20 @@
     <div class="container">
         <div class="upload-box">
             <h2>AI-Powered Defect Detection</h2>
-            <p>Upload an image and select a model to detect defects using Mask R-CNN technology</p>
+            <p>Upload an image or use the previous image, then select a model to detect defects using Mask R-CNN technology</p>
         </div>
         <form method="post" enctype="multipart/form-data" action="/predict">
-            <div class="upload-area">
-                <div class="upload-box-container">
-                    <div class="upload-icon">📁</div>
-                    <span>Drag & Drop or Click to Upload</span>
-                    <span class="upload-info">Supported formats: JPEG, PNG (Max 16MB)</span>
-                    <input type="file" id="image" name="image" accept="image/*" required>
-                </div>
+            {% if last_image_exists %}
+            <label class="checkbox-label">
+                <input type="checkbox" id="use_last_image" name="use_last_image" value="true"> Use previous image
+            </label>
+            <p class="image-info">Last image: {{ last_image_name }} (stored in ImagesUploaded/)</p>
+            {% endif %}
+            <div class="upload-area upload-box-container">
+                <div class="upload-icon">📁</div>
+                <span>Drag & Drop or Click to Upload</span>
+                <span class="upload-info">Supported formats: JPEG, PNG (Max 16MB)</span>
+                <input type="file" id="image" name="image" accept="image/*">
             </div>
             <div class="upload-area">
                 <label for="weights">Select Model:</label>
@@ -134,7 +208,16 @@
         {% if result_image %}
             <h3>Prediction Results:</h3>
             <p class="model-used">Model used: {{ model_used }}</p>
-            <img src="data:image/png;base64,{{ result_image }}" alt="Prediction Result" class="result-img">
+            <div class="results-container">
+                <div class="image-container">
+                    <p>Original Image</p>
+                    <img src="data:image/png;base64,{{ original_image }}" alt="Original Image" class="result-img">
+                </div>
+                <div class="image-container">
+                    <p>Prediction Result</p>
+                    <img src="data:image/png;base64,{{ result_image }}" alt="Prediction Result" class="result-img">
+                </div>
+            </div>
         {% endif %}
     </div>
 </body>
