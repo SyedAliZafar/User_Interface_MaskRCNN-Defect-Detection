@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mask R-CNN Crack Detection</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f0f2f5; }
+        .container { max-width: 800px; margin: auto; text-align: center; }
+        .upload-box {
+            background: linear-gradient(90deg, #6b48ff, #a35aff);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .upload-box h2 {
+            font-size: 2em;
+            margin: 0 0 10px 0;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .upload-box p {
+            font-size: 1em;
+            margin: 0;
+            opacity: 0.9;
+        }
+        .upload-area {
+            margin-bottom: 20px;
+        }
+        .upload-box-container {
+            width: 100%;
+            height: 120px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            cursor: pointer;
+            position: relative;
+        }
+        .upload-box-container:hover {
+            background-color: #f9f9f9;
+        }
+        .upload-box-container input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .upload-icon {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+        .upload-box-container span {
+            font-size: 1em;
+            color: #333;
+            margin: 5px 0;
+        }
+        .upload-info {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .select-box {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+        .analyze-btn {
+            background-color: #1da1f2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .analyze-btn:hover {
+            background-color: #1a91da;
+        }
+        .error { color: red; }
+        .model-used { color: green; font-weight: bold; }
+        img.result-img { max-width: 100%; height: auto; margin-top: 20px; }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('image');
+            const imageUploadText = document.querySelector('.upload-box-container span:nth-child(2)');
+            const originalImageText = imageUploadText.textContent;
+
+            imageInput.addEventListener('change', function() {
+                if (imageInput.files && imageInput.files.length > 0) {
+                    imageUploadText.textContent = 'Selected: ' + imageInput.files[0].name;
+                } else {
+                    imageUploadText.textContent = originalImageText;
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="upload-box">
+            <h2>AI-Powered Defect Detection</h2>
+            <p>Upload an image and select a model to detect defects using Mask R-CNN technology</p>
+        </div>
+        <form method="post" enctype="multipart/form-data" action="/predict">
+            <div class="upload-area">
+                <div class="upload-box-container">
+                    <div class="upload-icon">📁</div>
+                    <span>Drag & Drop or Click to Upload</span>
+                    <span class="upload-info">Supported formats: JPEG, PNG (Max 16MB)</span>
+                    <input type="file" id="image" name="image" accept="image/*" required>
+                </div>
+            </div>
+            <div class="upload-area">
+                <label for="weights">Select Model:</label>
+                <select id="weights" name="weights" class="select-box" required>
+                    <option value="" disabled selected>Select a model</option>
+                    <option value="Model1">Crack Detection Model 1</option>
+                    <option value="Model2">Crack Detection Model 2</option>
+                </select>
+            </div>
+            <input type="submit" value="Analyze" class="analyze-btn">
+        </form>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        {% if result_image %}
+            <h3>Prediction Results:</h3>
+            <p class="model-used">Model used: {{ model_used }}</p>
+            <img src="data:image/png;base64,{{ result_image }}" alt="Prediction Result" class="result-img">
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# Model weights
+Uploads/trainedModels/Model1/model1.h5
+Uploads/trainedModels/Model2/model2.h5
+
+# Temporary uploads
+Uploads/*.png
+Uploads/*.jpg
+Uploads/*.jpeg
+
+# Mask R-CNN library (dependency)
+mrcnn/
+
+# Logs and caches
+logs/
+*.log
+*.cache
+
+# IDE files
+.vscode/
+.idea/
