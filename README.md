@@ -61,7 +61,7 @@ python app.py
 
 1. Access the web interface at http://localhost:8880.
 2. Upload an image (PNG, JPG, or JPEG).
-3. Select a model ("Crack Detection Model 1" or "Crack Detection Model 2").
+3. Select a model ("Defect Detection Model 1" or "Defect Detection Model 2").
 4. Click "Analyze" to view the prediction results with defect visualizations.
 5. The UI displays the selected model and any errors (e.g., missing weights).
 
